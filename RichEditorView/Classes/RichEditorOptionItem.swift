@@ -21,7 +21,7 @@ public protocol RichEditorOption {
     /// The action to be evoked when the action is tapped
     /// - parameter editor: The RichEditorToolbar that the RichEditorOption was being displayed in when tapped.
     ///                     Contains a reference to the `editor` RichEditorView to perform actions on.
-    func action(_ editor: RichEditorToolbar?)
+    func action(_ editor: RichEditorToolbar, button: RichBarButtonItem)
 }
 
 /// RichEditorOptionItem is a concrete implementation of RichEditorOption.
@@ -37,9 +37,9 @@ public struct RichEditorOptionItem: RichEditorOption {
     /**
         The action to be performed when tapped
     */
-    public var handler: ((RichEditorToolbar?) -> Void)
+    public var handler: ((RichEditorToolbar, RichBarButtonItem) -> Void)
 
-    public init(image: UIImage?, title: String, action: @escaping ((RichEditorToolbar?) -> Void)) {
+    public init(image: UIImage?, title: String, action: @escaping ((RichEditorToolbar, RichBarButtonItem) -> Void)) {
         self.image = image
         self.title = title
         self.handler = action
@@ -47,8 +47,8 @@ public struct RichEditorOptionItem: RichEditorOption {
     
     // MARK: RichEditorOption
     
-    public func action(_ toolbar: RichEditorToolbar?) {
-        handler(toolbar)
+    public func action(_ toolbar: RichEditorToolbar, button: RichBarButtonItem) {
+        handler(toolbar, button)
     }
 }
 
@@ -149,31 +149,29 @@ public enum RichEditorOptions: RichEditorOption {
         }
     }
     
-    public func action(_ toolbar: RichEditorToolbar?) {
-        if let toolbar = toolbar {
-            switch self {
-            case .clear: toolbar.editor?.removeFormat()
-            case .undo: toolbar.editor?.undo()
-            case .redo: toolbar.editor?.redo()
-            case .bold: toolbar.editor?.bold()
-            case .italic: toolbar.editor?.italic()
-            case .subscript: toolbar.editor?.subscriptText()
-            case .superscript: toolbar.editor?.superscript()
-            case .strike: toolbar.editor?.strikethrough()
-            case .underline: toolbar.editor?.underline()
-            case .textColor: toolbar.delegate?.richEditorToolbarChangeTextColor?(toolbar)
-            case .textBackgroundColor: toolbar.delegate?.richEditorToolbarChangeBackgroundColor?(toolbar)
-            case .header(let h): toolbar.editor?.header(h)
-            case .indent: toolbar.editor?.indent()
-            case .outdent: toolbar.editor?.outdent()
-            case .orderedList: toolbar.editor?.orderedList()
-            case .unorderedList: toolbar.editor?.unorderedList()
-            case .alignLeft: toolbar.editor?.alignLeft()
-            case .alignCenter: toolbar.editor?.alignCenter()
-            case .alignRight: toolbar.editor?.alignRight()
-            case .Image: toolbar.delegate?.richEditorToolbarInsertImage?(toolbar)
-            case .link: toolbar.delegate?.richEditorToolbarInsertLink?(toolbar)
-            }
+    public func action(_ toolbar: RichEditorToolbar, button: RichBarButtonItem) {
+        switch self {
+        case .clear: toolbar.editor?.removeFormat()
+        case .undo: toolbar.editor?.undo()
+        case .redo: toolbar.editor?.redo()
+        case .bold: toolbar.editor?.bold()
+        case .italic: toolbar.editor?.italic()
+        case .subscript: toolbar.editor?.subscriptText()
+        case .superscript: toolbar.editor?.superscript()
+        case .strike: toolbar.editor?.strikethrough()
+        case .underline: toolbar.editor?.underline()
+        case .textColor: toolbar.delegate?.richEditorToolbarChangeTextColor?(toolbar, button:button)
+        case .textBackgroundColor: toolbar.delegate?.richEditorToolbarChangeBackgroundColor?(toolbar, button:button)
+        case .header(let h): toolbar.editor?.header(h)
+        case .indent: toolbar.editor?.indent()
+        case .outdent: toolbar.editor?.outdent()
+        case .orderedList: toolbar.editor?.orderedList()
+        case .unorderedList: toolbar.editor?.unorderedList()
+        case .alignLeft: toolbar.editor?.alignLeft()
+        case .alignCenter: toolbar.editor?.alignCenter()
+        case .alignRight: toolbar.editor?.alignRight()
+        case .Image: toolbar.delegate?.richEditorToolbarInsertImage?(toolbar, button:button)
+        case .link: toolbar.delegate?.richEditorToolbarInsertLink?(toolbar, button:button)
         }
     }
 }

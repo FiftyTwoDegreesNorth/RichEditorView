@@ -12,38 +12,39 @@ import UIKit
 @objc public protocol RichEditorToolbarDelegate: class {
 
     /// Called when the Text Color toolbar item is pressed.
-    @objc optional func richEditorToolbarChangeTextColor(_ toolbar: RichEditorToolbar)
+    @objc optional func richEditorToolbarChangeTextColor(_ toolbar: RichEditorToolbar, button: RichBarButtonItem)
 
     /// Called when the Background Color toolbar item is pressed.
-    @objc optional func richEditorToolbarChangeBackgroundColor(_ toolbar: RichEditorToolbar)
+    @objc optional func richEditorToolbarChangeBackgroundColor(_ toolbar: RichEditorToolbar, button: RichBarButtonItem)
 
     /// Called when the Insert Image toolbar item is pressed.
-    @objc optional func richEditorToolbarInsertImage(_ toolbar: RichEditorToolbar)
+    @objc optional func richEditorToolbarInsertImage(_ toolbar: RichEditorToolbar, button: RichBarButtonItem)
 
     /// Called when the Insert Link toolbar item is pressed.
-    @objc optional func richEditorToolbarInsertLink(_ toolbar: RichEditorToolbar)
+    @objc optional func richEditorToolbarInsertLink(_ toolbar: RichEditorToolbar, button: RichBarButtonItem)
 }
 
 /// RichBarButtonItem is a subclass of UIBarButtonItem that takes a callback as opposed to the target-action pattern
 open class RichBarButtonItem: UIBarButtonItem {
-    open var actionHandler: ((Void) -> Void)?
+    public typealias ActionHandlerType = (_ item:RichBarButtonItem) -> Void
+    open var actionHandler: ActionHandlerType?
     
-    public convenience init(image: UIImage? = nil, handler: ((Void) -> Void)? = nil) {
+    public convenience init(image: UIImage? = nil, handler: ActionHandlerType? = nil) {
         self.init(image: image, style: .plain, target: nil, action: nil)
         target = self
         action = #selector(RichBarButtonItem.buttonWasTapped)
         actionHandler = handler
     }
     
-    public convenience init(title: String = "", handler: ((Void) -> Void)? = nil) {
+    public convenience init(title: String = "", handler: ActionHandlerType? = nil) {
         self.init(title: title, style: .plain, target: nil, action: nil)
         target = self
         action = #selector(RichBarButtonItem.buttonWasTapped)
         actionHandler = handler
     }
     
-    func buttonWasTapped() {
-        actionHandler?()
+    func buttonWasTapped(_ item:RichBarButtonItem) {
+        actionHandler?(item)
     }
 }
 
@@ -118,11 +119,17 @@ open class RichEditorToolbar: UIView {
         var buttons = [UIBarButtonItem]()
         for option in options {
             if let image = option.image {
-                let button = RichBarButtonItem(image: image) { [weak self] in  option.action(self) }
+                let button = RichBarButtonItem(image: image) { [weak self] button in
+                    guard let strongSelf = self else { return }
+                    option.action(strongSelf, button:button)
+                }
                 buttons.append(button)
             } else {
                 let title = option.title
-                let button = RichBarButtonItem(title: title) { [weak self] in option.action(self) }
+                let button = RichBarButtonItem(title: title) { [weak self] button in
+                    guard let strongSelf = self else { return }
+                    option.action(strongSelf, button:button)
+                }
                 buttons.append(button)
             }
 
