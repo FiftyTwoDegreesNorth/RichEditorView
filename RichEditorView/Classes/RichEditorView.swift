@@ -518,4 +518,26 @@ open class RichEditorView: UIView, UIScrollViewDelegate, UIWebViewDelegate, UIGe
         }
     }
     
+    override open func resignFirstResponder() -> Bool {
+        if webView.containsFirstResponder {
+            webView.isUserInteractionEnabled=false
+            webView.isUserInteractionEnabled=true
+            return true
+        }
+        return false
+    }
+    
+    override open func becomeFirstResponder() -> Bool {
+        if !webView.containsFirstResponder {
+            focus()
+            return true
+        }else{
+            return false
+        }
+    }
+
+    open override var isFirstResponder: Bool {
+        return webView.containsFirstResponder
+    }
+    
 }
