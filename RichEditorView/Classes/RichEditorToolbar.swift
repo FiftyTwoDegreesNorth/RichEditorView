@@ -43,7 +43,7 @@ open class RichBarButtonItem: UIBarButtonItem {
         actionHandler = handler
     }
     
-    func buttonWasTapped(_ item:RichBarButtonItem) {
+    @objc func buttonWasTapped(_ item:RichBarButtonItem) {
         actionHandler?(item)
     }
 }
